@@ -1,38 +1,113 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
-const app = express();
-const port = process.env.PORT || 3500;
-const dbUrl = process.env.DB_URL;
+import { useState } from 'react';
+import '../styles/Auth.css';
+import userSlice from '../store/';
 
-// Connect to MongoDB
-mongoose.connect(dbUrl)
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.error('MongoDB connection error:', err));
+const Auth = () => {
+  const { isAdmin, setIsAdmin, isLoggedIn, setIsLoggedIn } = userSlice();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
+  const [isRegister, setIsRegister] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+  const toggleAuth = () => {
+    setIsRegister(prev => !prev);
+  }
 
-app.get('/', (req, res) => {
-    res.send('Welcome to the Capstone Backend API');    
-});
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
 
-app.get('/products', async (req, res) => {
-    try {
-        const products = [
-            { id: 1, name: 'Product 1', price: 100 },
-            { id: 2, name: 'Product 2', price: 200 },
-            { id: 3, name: 'Product 3', price: 300 }
-        ];
-        res.json(products);
-    } catch (error) {
-        console.error('Error fetching products:', error);
-        res.status(500).json({ message: 'Internal Server Error' });
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    if(res){
+      setIsAdmin(res.isAdmin);
+      setIsLoggedIn();
+      alert('Successfully logged in!');
+    } else {
+      alert('Failed to login!');
     }
-});
+    
+    setIsSubmitting(false);
+  }
 
-app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
-});
+  return (
+    <div className="login-container">
+      <div className="login-header">
+        <h2>Welcome Back</h2>
+      </div>
+
+      <form className="login-form" onSubmit={handleSubmit}>
+        {isLoggedIn && (
+          <div className="success-message">
+            Login successful! Redirecting...
+          </div>
+        )}
+
+        <div className="form-group">
+          <label htmlFor="email">Email Address</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            className={`form-input`}
+            placeholder="Enter your email"
+            value={formData.email}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            className={`form-input`}
+            placeholder="Enter your password"
+            value={formData.password}
+            onChange={handleChange}
+          />
+        </div>
+        { !isRegister ?
+          <>
+            <button
+              type="submit"
+              className="login-button"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Logging in...' : 'Login'}
+            </button>
+
+            <div className="signup-link">
+              Don't have an account? <a onClick={() => {toggleAuth()}}>Sign up</a>
+            </div>
+          </>
+          :
+          <>
+            <button
+              type="submit"
+              className="login-button"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Registering...' : 'Register'}
+            </button>
+
+            <div className="signup-link">
+              Already have an account? <a onClick={() => {toggleAuth()}}>Login</a>
+            </div>
+          </>
+        }
+      </form>
+    </div>
+  )
+}
+
+export default Auth;

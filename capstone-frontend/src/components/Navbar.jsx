@@ -1,24 +1,30 @@
 import React from 'react'
-import { NavLink } from 'react-router';
-import { useCartStore } from '../store/CartStore';
+import { Link } from 'react-router';
+// import { useCartStore } from '../store/CartStore';
+import userSlice from '../store';
 import '../styles/navbar.css';
 
 const Navbar = () => {
-  const { items } = useCartStore();
-  const totalPrice = items?.reduce((total, item) => total + item.price, 0);
+  // const { items } = useCartStore();
+  // const totalPrice = items?.reduce((total, item) => total + item.price, 0);
+  const {isAdmin,setIsAdmin, isLoggedIn, setIsLoggedIn } = userSlice();
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setIsAdmin(false);
+  }
+
   return (
     <nav className='navbar'>
-      <h1>Header Goes Here</h1>
-      <section className='nav-links-container'>
-        <NavLink to="/" className='nav-link'>Home</NavLink>
-        {/* You will have to adjust the NavLink element below this comment to create a real checkout page, starting with creating a new route in your project and then adjusting the `to` property */}
-        <NavLink to="#" className='nav-link'>Checkout ${totalPrice}</NavLink>
-        {/* Create New NavLink Elements in your project and place them below this comment */}
-
-        {/* Create New NavLink Elements in your project and place them above this comment */}
-      </section>
+      <Link to={'/'}>Logo</Link>
+      <div className='nav-links-container'>
+        <Link to={'/admin/product/create'}>Create Product</Link>
+      </div>
+      <div className='auth-container'>
+        {!isLoggedIn ? <Link to={'/auth'}>Login</Link> : <button onClick={() => {handleLogout()}}>Logout</button>}
+      </div>
     </nav>
   )
 }
 
-export default Navbar
+export default Navbar;
